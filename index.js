@@ -9,6 +9,15 @@ nunjucks.configure("views", {
   watch: true
 });
 
+const checkQueryParam = (req, res, next) => {
+  const { idade } = req.query;
+
+  if (!idade) {
+    return res.redirect("/");
+  }
+  return next();
+};
+
 app.use(express.urlencoded({ extended: false }));
 app.set("view engine", "njk");
 
@@ -18,21 +27,20 @@ app.get("/", (req, res) => {
 
 app.post("/check", (req, res) => {
   console.log(req.body);
-  const idade = req.body.idade;
-  if (req.body.idade >= 18) {
+  const { idade } = req.body;
+  if (idade >= 18) {
     res.redirect(`major?idade=${idade}`);
   } else {
     res.redirect(`minor?idade=${idade}`);
   }
-  //return res.render("form");
 });
 
-app.get("/major", (req, res) => {
-  const idade = req.query.idade;
+app.get("/major", checkQueryParam, (req, res) => {
+  const { idade } = req.query;
   return res.render(`major`, { idade });
 });
 
-app.get("/minor", (req, res) => {
+app.get("/minor", checkQueryParam, (req, res) => {
   const idade = req.query.idade;
   return res.render(`minor`, { idade });
 });
